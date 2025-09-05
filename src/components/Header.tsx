@@ -1,9 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, Phone, User } from "lucide-react";
+import { Heart, Menu, Phone, User, Sun, Moon, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Header = () => {
   const location = useLocation();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -20,20 +31,36 @@ export const Header = () => {
           <nav className="flex items-center">
             <div className="hidden md:flex items-center space-x-6 text-sm font-medium">
               <Link
+                to="/"
+                className={`transition-colors hover:text-primary ${
+                  isActive("/") ? "text-primary font-semibold" : "text-muted-foreground"
+                }`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/donate"
+                className={`transition-colors hover:text-primary ${
+                  isActive("/donate") ? "text-primary font-semibold" : "text-muted-foreground"
+                }`}
+              >
+                Donate
+              </Link>
+              <Link
                 to="/requests"
                 className={`transition-colors hover:text-primary ${
                   isActive("/requests") ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
-                Requests
+                Request Blood
               </Link>
               <Link
-                to="/my-donations"
+                to="/about"
                 className={`transition-colors hover:text-primary ${
-                  isActive("/my-donations") ? "text-primary font-semibold" : "text-muted-foreground"
+                  isActive("/about") ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
-                My Donations
+                About
               </Link>
               <Link
                 to="/contact"
@@ -44,15 +71,47 @@ export const Header = () => {
                 Contact
               </Link>
             </div>
-            <Button size="sm" className="ml-4 hidden md:flex" asChild>
-              <Link to="/contact">
-                <Phone className="mr-2 h-4 w-4" />
-                Help
-              </Link>
+            {/* Theme Toggle */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleTheme}
+              className="ml-4"
+            >
+              {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="sm" className="ml-2">
-              <User className="h-4 w-4" />
-            </Button>
+            
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="ml-2">
+                    <User className="h-4 w-4 mr-2" />
+                    {user?.name}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-donations">My Donations</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/leaderboard">Leaderboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="text-red-600">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="outline" size="sm" className="ml-2" asChild>
+                <Link to="/login">
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Link>
+              </Button>
+            )}
             <Button variant="ghost" size="sm" className="ml-2 md:hidden">
               <Menu className="h-4 w-4" />
             </Button>
